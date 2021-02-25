@@ -24,9 +24,7 @@ namespace MineSwapper
         static bool GameOver = true;
 
         static void FoolField() 
-        {
-           
-            
+        { 
             Random Rand = new Random();
             int Mines = 0;
 
@@ -124,25 +122,25 @@ namespace MineSwapper
 
             if (Board[PointY, PointX] == 0)
             {
-                    if (DFSBoard[PointY, PointX] == 0)
-                    {
-                         DFSBoard[PointY, PointX] = 1;
+                if (DFSBoard[PointY, PointX] == 0)
+                {
+                        DFSBoard[PointY, PointX] = 1;
 
-                        for (int k = 0; k < 8; ++k)
+                    for (int k = 0; k < 8; ++k)
+                    {
+                        if (Board[PointY + row[k], PointX + col[k]] != -1)
                         {
-                            if (Board[PointY + row[k], PointX + col[k]] != -1)
+                            if (UsedBoard[PointY + row[k], PointX + col[k]] != 1)
                             {
-                                if (UsedBoard[PointY + row[k], PointX + col[k]] != 1)
-                                {
-                                    OpenCells++;
-                                    UsedBoard[PointY + row[k], PointX + col[k]] = 1;
-                                    SwiftOpen(PointY + row[k], PointX + col[k]);
-                                }
+                                OpenCells++;
+                                UsedBoard[PointY + row[k], PointX + col[k]] = 1;
+                                SwiftOpen(PointY + row[k], PointX + col[k]);
                             }
                         }
-                        PlayingField();
                     }
-                    else { return; }
+                    PlayingField();
+                }
+                else { return; }
             }
             else { return ; }
        }
