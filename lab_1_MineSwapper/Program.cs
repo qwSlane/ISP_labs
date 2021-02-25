@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace MineSwapper
 {
     class Mainclass
@@ -10,10 +9,11 @@ namespace MineSwapper
 
         static int [,] Board = new int[11,11];
         static int[,] UsedBoard = new int[11, 11];
+        static int[,] DFSBoard = new int[11, 11];
+
         static int Flags = 10;
         static int OpenCells = 0;
         static int GameScore = 0;
-
 
         static int[] row = new int[] {-1, -1, -1, 0, 1, 1, 1, 0};
         static int[] col = new int[] { -1, 0,  1, 1, 1, 0, -1, -1 };
@@ -25,6 +25,8 @@ namespace MineSwapper
 
         static void FoolField() 
         {
+           
+            
             Random Rand = new Random();
             int Mines = 0;
 
@@ -44,13 +46,13 @@ namespace MineSwapper
                         if (Board[x, y] != 9 && Board[x, y] != -1) 
                         {
                           Board[x, y] = 9;
-                                     for (int i = 0; i < 8; i++)    //mine counter around the point
-                                     {
-                                          if (Board[x + row[i], y + col[i]] != -1 && Board[x + row[i], y + col[i]] != 9)
-                                          {
-                                            Board[x + row[i], y + col[i]]++;
-                                          }
-                                     }
+                                for (int i = 0; i < 8; i++)    //mine counter around the point
+                                {
+                                    if (Board[x + row[i], y + col[i]] != -1 && Board[x + row[i], y + col[i]] != 9)
+                                    {
+                                    Board[x + row[i], y + col[i]]++;
+                                    }
+                                }
                           Mines++;
                         }
                 }              
@@ -70,7 +72,6 @@ namespace MineSwapper
             }
         }
 
-
         static void PlayingField() 
         {
             Console.Clear();
@@ -82,7 +83,6 @@ namespace MineSwapper
                 {
                     if (i == PointY && j == PointX) //point painter
                     { Console.Write("*" + " "); }
-
 
                     else
                     {
@@ -109,43 +109,43 @@ namespace MineSwapper
                     }
                     
                 }
-                Console.WriteLine("");
-               
-                
+                Console.WriteLine("");    
             }
+
             Minesweeper();
             Console.WriteLine($"Flags={ Flags}");
             Console.WriteLine($"Open cells={ OpenCells}");
         }
 
 
-       static void SwiftOpen()  //opening multiple cells
+
+       static void SwiftOpen(int PointY, int PointX)  //opening multiple cells
         {
 
             if (Board[PointY, PointX] == 0)
             {
-
-                for (int k = 0; k < 8; k++)
-                {     
-                    if ( Board[PointY + row[k], PointX + col[k]] == 0)
+                    if (DFSBoard[PointY, PointX] == 0)
                     {
-                            if (UsedBoard[PointY + row[k], PointX + col[k]] == 0)
+                         DFSBoard[PointY, PointX] = 1;
+
+                        for (int k = 0; k < 8; ++k)
+                        {
+                            if (Board[PointY + row[k], PointX + col[k]] != -1)
                             {
-                                OpenCells++; 
-                              
-                            }    
-                        UsedBoard[PointY + row[k], PointX + col[k]]=1;
+                                if (UsedBoard[PointY + row[k], PointX + col[k]] != 1)
+                                {
+                                    OpenCells++;
+                                    UsedBoard[PointY + row[k], PointX + col[k]] = 1;
+                                    SwiftOpen(PointY + row[k], PointX + col[k]);
+                                }
+                            }
+                        }
                         PlayingField();
                     }
-                }
-                          
+                    else { return; }
             }
-
-            
+            else { return ; }
        }
-
-
-
 
         static void Pointer() 
         {
@@ -158,7 +158,6 @@ namespace MineSwapper
                     {
                         PointX =1;
                         PlayingField();
-
                     }
                         else
                         {
@@ -174,11 +173,11 @@ namespace MineSwapper
                         PointX = 9;
                         PlayingField();
                     }
-                    else
-                    {
-                        PointX--;
-                        PlayingField();
-                    }
+                        else
+                        {
+                         PointX--;
+                         PlayingField();
+                        }
                     break;
 
                 case ConsoleKey.UpArrow:
@@ -188,11 +187,11 @@ namespace MineSwapper
                         PointY = 9;
                         PlayingField();
                     }
-                    else
-                    {
-                        PointY--;
-                        PlayingField();
-                    }
+                        else
+                        {
+                            PointY--;
+                            PlayingField();
+                        }
                     break;
 
                 case ConsoleKey.DownArrow:
@@ -202,25 +201,27 @@ namespace MineSwapper
                         PointY = 1;
                         PlayingField();
                     }
-                    else
-                    {
-                        PointY++;
-                        PlayingField();
-                    }
+                        else
+                        {
+                            PointY++;
+                            PlayingField();
+                        }
                     break;
 
                 case ConsoleKey.Enter: //open cell
                     if (Board[PointY, PointX] != 9 || UsedBoard[PointY, PointX] == 2)
                     {
                         if (UsedBoard[PointY, PointX] == 2)
-                        { UsedBoard[PointY, PointX] = 0; }
+                        { UsedBoard[PointY, PointX] = 0;
+                            Flags++;
+                        }
                             else 
                             {
                             if (UsedBoard[PointY, PointX] == 0) { OpenCells++; }
                                 UsedBoard[PointY, PointX] = 1;
                                 
                                 PlayingField();
-                                SwiftOpen();
+                                SwiftOpen(PointY, PointX);
                             }
                     }
                     else { GameOver = false; }
@@ -234,10 +235,7 @@ namespace MineSwapper
                         Flags--;
                     }
                     break;
-
             }
-        
-        
         }
 
         static void FuncScore()  
@@ -250,8 +248,6 @@ namespace MineSwapper
                     { GameScore += 10; }
                 }
             }
-
-
         }
 
         static void Minesweeper() //logo
@@ -274,11 +270,10 @@ namespace MineSwapper
             FoolField();
             PlayingField();
             
-
             while (GameOver)
             {     
                 Pointer();
-                //PrintField();
+                
                 if (OpenCells == 71) 
                 { 
                     GameOver = false;
@@ -289,7 +284,6 @@ namespace MineSwapper
 
             }
             Console.WriteLine("GameOver");
-            
         }
     }
 }
